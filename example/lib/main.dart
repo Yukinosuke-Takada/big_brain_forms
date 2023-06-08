@@ -32,14 +32,24 @@ class MyHomePage extends StatelessWidget {
         title: Text(title),
       ),
       body: Center(
-        child: ValueSteppers(
-          text: 'Age',
-          minValue: -2,
-          maxValue: 2,
-          steps: 1,
-          // onValueChanged: (value) {
-          //   print('Value changed to $value');
-          // },
+        child: Column(
+          children: [
+            ValueSteppers(
+              text: 'Age',
+              minValue: -2,
+              maxValue: 100,
+              steps: 1,
+              onValueChanged: (value) {
+                print('Value changed to $value');
+              },
+            ),
+            const PhoneNumberPicker(
+              text: 'Phone number',
+              initialPhoneNumber: '2065550100',
+              useCountryCode: true,
+              initialCountryCode: 1,
+            ),
+          ],
         ),
       ),
     );
