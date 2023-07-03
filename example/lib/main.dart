@@ -49,6 +49,13 @@ class MyHomePage extends StatelessWidget {
               useCountryCode: true,
               initialCountryCode: 1,
             ),
+            const YearSlider(
+              text: 'Year',
+              initialYear: 2001,
+              minYear: -13600000000,
+              // minYear: 0,
+              maxYear: 2023,
+            ),
           ],
         ),
       ),
