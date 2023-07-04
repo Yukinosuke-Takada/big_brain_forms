@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Big Brain Forms Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: const Color(0xFF42A5F5),
+        useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Big Brain Forms Demo'),
     );
@@ -27,36 +28,54 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ValueSteppersController c = ValueSteppersController();
+    final PhoneNumberPickerController c2 = PhoneNumberPickerController();
+    final YearSliderController c3 = YearSliderController();
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
       body: Center(
-        child: Column(
-          children: [
-            ValueSteppers(
-              text: 'Age',
-              minValue: -2,
-              maxValue: 100,
-              steps: 1,
-              onValueChanged: (value) {
-                print('Value changed to $value');
-              },
-            ),
-            const PhoneNumberPicker(
-              text: 'Phone number',
-              initialPhoneNumber: '2065550100',
-              useCountryCode: true,
-              initialCountryCode: 1,
-            ),
-            const YearSlider(
-              text: 'Year',
-              initialYear: 2001,
-              minYear: -13600000000,
-              // minYear: 0,
-              maxYear: 2023,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              ValueSteppers(
+                controller: c,
+                text: 'Age',
+                minValue: -2,
+                maxValue: 100,
+                steps: 1,
+                onValueChanged: (value) {
+                  print('Value changed to $value');
+                },
+                textFontSize: 18,
+              ),
+              PhoneNumberPicker(
+                controller: c2,
+                text: 'Phone number',
+                initialPhoneNumber: '2065550100',
+                useCountryCode: true,
+                initialCountryCode: 1,
+                textFontSize: 18,
+              ),
+              YearSlider(
+                controller: c3,
+                text: 'Year',
+                initialYear: 2001,
+                minYear: -13600000000,
+                // minYear: 0,
+                maxYear: 2023,
+                textFontSize: 18,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print(c3.getValue());
+                },
+                child: const Text('print value'),
+              ),
+            ],
+          ),
         ),
       ),
     );

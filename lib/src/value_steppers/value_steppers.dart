@@ -1,6 +1,7 @@
 part of '../../big_brain_forms.dart';
 
 class ValueSteppers extends StatefulWidget {
+  final ValueSteppersController? controller;
   final int initialValue;
   final int? minValue;
   final int? maxValue;
@@ -8,9 +9,17 @@ class ValueSteppers extends StatefulWidget {
   final bool readOnly;
   final void Function(int value)? onValueChanged;
   final String text;
+  final double? textFontSize;
+  final TextStyle? labelTextStyle;
+  final TextStyle? valueTextStyle;
+  final Icon incrementIcon;
+  final Icon decrementIcon;
+  final double labelBottomPadding;
+  final double bottomPadding;
 
   const ValueSteppers({
     super.key,
+    this.controller,
     this.initialValue = 0,
     this.minValue,
     this.maxValue,
@@ -18,6 +27,13 @@ class ValueSteppers extends StatefulWidget {
     this.readOnly = false,
     this.onValueChanged,
     required this.text,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.incrementIcon = const Icon(Icons.add),
+    this.decrementIcon = const Icon(Icons.remove),
+    this.labelBottomPadding = 8.0,
+    this.bottomPadding = 18.0,
   });
 
   @override
@@ -58,14 +74,26 @@ class _ValueSteppersState extends State<ValueSteppers> {
   void initState() {
     super.initState();
     _value = widget.initialValue;
-    _controller = ValueSteppersController(
-      initialValue: widget.initialValue,
-      steps: widget.steps,
-      onValueChanged: (value) {
-        _onValueChanged(value);
-        widget.onValueChanged?.call(value);
-      },
-    );
+    if (widget.controller == null) {
+      _controller = ValueSteppersController.fromValue(
+        initialValue: widget.initialValue,
+        steps: widget.steps,
+        onValueChanged: (value) {
+          _onValueChanged(value);
+          widget.onValueChanged?.call(value);
+        },
+      );
+    } else {
+      _controller = widget.controller!;
+      _controller.setInitialValues(
+        initialValue: widget.initialValue,
+        steps: widget.steps,
+        onValueChanged: (value) {
+          _onValueChanged(value);
+          widget.onValueChanged?.call(value);
+        },
+      );
+    }
   }
 
   @override
@@ -76,38 +104,30 @@ class _ValueSteppersState extends State<ValueSteppers> {
         children: [
           Row(
             children: [
-              Text(widget.text),
+              Text(widget.text, style: widget.labelTextStyle ?? TextStyle(fontSize: widget.textFontSize ?? 14)),
               const Spacer(),
-              Text(_value.toString()),
+              Text(_value.toString(), style: widget.valueTextStyle ?? TextStyle(fontSize: widget.textFontSize ?? 14)),
             ],
           ),
+          SizedBox(height: widget.labelBottomPadding),
           Row(
             children: [
               const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  if (canDecrement()) {
-                    _controller.decrement();
-                  }
-                },
-                child: Icon(
-                  Icons.remove,
-                  color: canDecrement() ? null : Colors.grey,
-                ),
+              IconButton.filledTonal(
+                icon: widget.decrementIcon,
+                onPressed: canDecrement() ? () {
+                  if (canDecrement()) _controller.decrement();
+                } : null,
               ),
-              GestureDetector(
-                onTap: () {
-                  if (canIncrement()) {
-                    _controller.increment();
-                  }
-                },
-                child: Icon(
-                  Icons.add,
-                  color: canIncrement() ? null : Colors.grey,
-                ),
+              IconButton.filledTonal(
+                icon: widget.incrementIcon,
+                onPressed: canIncrement() ? () {
+                  if (canIncrement()) _controller.increment();
+                } : null,
               ),
             ],
-          )
+          ),
+          SizedBox(height: widget.bottomPadding),
         ],
       ),
     );

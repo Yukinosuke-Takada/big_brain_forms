@@ -1,17 +1,34 @@
 part of '../../big_brain_forms.dart';
 
 class ValueSteppersController {
-  final int initialValue;
-  final int steps;
-  final void Function(int value) onValueChanged;
+  int initialValue;
+  int value;
+  int steps;
+  void Function(int value)? onValueChanged;
 
-  ValueSteppersController({
+  ValueSteppersController.fromValue({
     required this.initialValue,
     required this.steps,
-    required this.onValueChanged,
+    this.onValueChanged,
   }) : value = initialValue;
 
-  int value;
+  factory ValueSteppersController() {
+    return ValueSteppersController.fromValue(
+      initialValue: 0,
+      steps: 1,
+    );
+  }
+
+  void setInitialValues({
+    required int initialValue,
+    required int steps,
+    void Function(int value)? onValueChanged,
+  }) {
+    this.initialValue = initialValue;
+    this.steps = steps;
+    this.onValueChanged = onValueChanged;
+    value = initialValue;
+  }
 
   int getValue() {
     return value;
@@ -19,16 +36,21 @@ class ValueSteppersController {
 
   void setValue(int value) {
     this.value = value;
-    onValueChanged(value);
+    onValueChanged?.call(value);
   }
 
   void increment() {
     value += steps;
-    onValueChanged(value);
+    onValueChanged?.call(value);
   }
 
   void decrement() {
     value -= steps;
-    onValueChanged(value);
+    onValueChanged?.call(value);
+  }
+
+  void reset() {
+    value = initialValue;
+    onValueChanged?.call(value);
   }
 }
