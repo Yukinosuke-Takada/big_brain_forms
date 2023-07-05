@@ -1,6 +1,7 @@
 part of '../../big_brain_forms.dart';
 
 class YearSlider extends StatefulWidget {
+  final YearSliderController? controller;
   final int initialYear;
   final int minYear;
   final int maxYear;
@@ -10,6 +11,7 @@ class YearSlider extends StatefulWidget {
 
   const YearSlider({
     super.key,
+    this.controller,
     this.initialYear = 0,
     required this.minYear,
     required this.maxYear,
@@ -23,26 +25,40 @@ class YearSlider extends StatefulWidget {
 }
 
 class _YearSliderState extends State<YearSlider> {
-  late YearSliderController _controller;
+  YearSliderController? _localController;
+  YearSliderController get _effectiveController =>
+      widget.controller ?? _localController!;
   late Year _value;
-
-  void _onValueChanged(Year value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   @override
   void initState() {
-    super.initState();
     _value = Year(widget.initialYear);
-    _controller = YearSliderController(
-      initialYear: widget.initialYear,
-      onValueChanged: (value) {
-        _onValueChanged(value);
-        widget.onValueChanged?.call(value);
-      },
-    );
+    if (widget.controller == null) {
+      _localController = YearSliderController.fromValue(
+        initialYear: widget.initialYear,
+      );
+    } else {
+      widget.controller!.setInitialValues(
+        initialYear: widget.initialYear,
+      );
+    }
+    _effectiveController.addListener(_handleValueChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
+    super.dispose();
+  }
+
+  void _handleValueChange() {
+    final Year newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   @override
@@ -63,7 +79,7 @@ class _YearSliderState extends State<YearSlider> {
             min: widget.minYear.toDouble(),
             max: widget.maxYear.toDouble(),
             onChanged: (value) {
-              _controller.onSliderChange(value);
+              _effectiveController.onSliderChange(value);
             },
           )
         ],

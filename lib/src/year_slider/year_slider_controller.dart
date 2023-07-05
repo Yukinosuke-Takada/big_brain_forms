@@ -73,21 +73,52 @@ class Year {
         throw Exception('should not reach here');
     }
   }
+
+  @override
+  String toString() {
+    return year.toString();
+  }
 }
 
-class YearSliderController {
-  final void Function(Year) onValueChanged;
-
-  YearSliderController({
-    required this.onValueChanged,
-    required int initialYear,
-  }) : value = Year(initialYear);
-
+class YearSliderController extends ChangeNotifier {
+  Year initialYear;
   Year value;
+
+  YearSliderController.fromValue({
+    required int initialYear,
+  })  : value = Year(initialYear),
+        initialYear = Year(initialYear);
+
+  factory YearSliderController() {
+    return YearSliderController.fromValue(
+      initialYear: 0,
+    );
+  }
+
+  void setInitialValues({
+    required int initialYear,
+  }) {
+    this.initialYear = Year(initialYear);
+    value = this.initialYear;
+  }
+
+  Year getValue() {
+    return value;
+  }
+
+  void setValue(Year value) {
+    this.value = value;
+    notifyListeners();
+  }
 
   void onSliderChange(double value) {
     final Year year = Year(value.toInt());
     this.value = year;
-    onValueChanged(year);
+    notifyListeners();
+  }
+
+  void reset() {
+    value = initialYear;
+    notifyListeners();
   }
 }

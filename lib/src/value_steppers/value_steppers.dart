@@ -1,6 +1,7 @@
 part of '../../big_brain_forms.dart';
 
 class ValueSteppers extends StatefulWidget {
+  final ValueSteppersController? controller;
   final int initialValue;
   final int? minValue;
   final int? maxValue;
@@ -11,6 +12,7 @@ class ValueSteppers extends StatefulWidget {
 
   const ValueSteppers({
     super.key,
+    this.controller,
     this.initialValue = 0,
     this.minValue,
     this.maxValue,
@@ -25,14 +27,10 @@ class ValueSteppers extends StatefulWidget {
 }
 
 class _ValueSteppersState extends State<ValueSteppers> {
-  late ValueSteppersController _controller;
+  ValueSteppersController? _localController;
+  ValueSteppersController get _effectiveController =>
+      widget.controller ?? _localController!;
   late int _value;
-
-  void _onValueChanged(int value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   bool canIncrement() {
     if (widget.readOnly) {
@@ -56,16 +54,35 @@ class _ValueSteppersState extends State<ValueSteppers> {
 
   @override
   void initState() {
-    super.initState();
     _value = widget.initialValue;
-    _controller = ValueSteppersController(
-      initialValue: widget.initialValue,
-      steps: widget.steps,
-      onValueChanged: (value) {
-        _onValueChanged(value);
-        widget.onValueChanged?.call(value);
-      },
-    );
+    if (widget.controller == null) {
+      _localController = ValueSteppersController.fromValue(
+        initialValue: widget.initialValue,
+        steps: widget.steps,
+      );
+    } else {
+      widget.controller!.setInitialValues(
+        initialValue: widget.initialValue,
+        steps: widget.steps,
+      );
+    }
+    _effectiveController.addListener(_handleValueChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
+    super.dispose();
+  }
+
+  void _handleValueChange() {
+    final int newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   @override
@@ -87,7 +104,7 @@ class _ValueSteppersState extends State<ValueSteppers> {
               GestureDetector(
                 onTap: () {
                   if (canDecrement()) {
-                    _controller.decrement();
+                    _effectiveController.decrement();
                   }
                 },
                 child: Icon(
@@ -98,7 +115,7 @@ class _ValueSteppersState extends State<ValueSteppers> {
               GestureDetector(
                 onTap: () {
                   if (canIncrement()) {
-                    _controller.increment();
+                    _effectiveController.increment();
                   }
                 },
                 child: Icon(

@@ -27,6 +27,9 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ValueSteppersController controller1 = ValueSteppersController();
+    final PhoneNumberPickerController controller2 = PhoneNumberPickerController();
+    final YearSliderController controller3 = YearSliderController();
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -35,6 +38,7 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           children: [
             ValueSteppers(
+              controller: controller1,
               text: 'Age',
               minValue: -2,
               maxValue: 100,
@@ -43,18 +47,34 @@ class MyHomePage extends StatelessWidget {
                 print('Value changed to $value');
               },
             ),
-            const PhoneNumberPicker(
+            PhoneNumberPicker(
+              controller: controller2,
               text: 'Phone number',
               initialPhoneNumber: '2065550100',
               useCountryCode: true,
               initialCountryCode: 1,
+              onValueChanged: (value) {
+                print('Value changed to $value');
+              },
             ),
-            const YearSlider(
+            YearSlider(
+              controller: controller3,
               text: 'Year',
               initialYear: 2001,
               minYear: -13600000000,
               // minYear: 0,
               maxYear: 2023,
+              onValueChanged: (value) {
+                print('Value changed to $value');
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                print('ValueSteppers: ${controller1.getValue()}');
+                print('PhoneNumberPicker: ${controller2.getValue()}');
+                print('YearSlider: ${controller3.getValue()}');
+              },
+              child: const Text('Print values'),
             ),
           ],
         ),

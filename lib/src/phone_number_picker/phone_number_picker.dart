@@ -1,6 +1,6 @@
 part of '../../big_brain_forms.dart';
 
-final List<DropdownMenuItem<int>> _items = List.generate(
+final List<DropdownMenuItem<int>> _digitItems = List.generate(
   10,
   (index) => DropdownMenuItem(
     value: index,
@@ -17,6 +17,7 @@ final List<DropdownMenuItem<int>> _countryCodeItems = List.generate(
 );
 
 class PhoneNumberPicker extends StatefulWidget {
+  final PhoneNumberPickerController? controller;
   final String initialPhoneNumber;
   final bool useCountryCode;
   final int? initialCountryCode;
@@ -26,6 +27,7 @@ class PhoneNumberPicker extends StatefulWidget {
 
   const PhoneNumberPicker({
     super.key,
+    this.controller,
     this.initialPhoneNumber = '0000000000',
     this.useCountryCode = false,
     this.initialCountryCode,
@@ -39,29 +41,43 @@ class PhoneNumberPicker extends StatefulWidget {
 }
 
 class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
-  late PhoneNumberPickerController _controller;
+  PhoneNumberPickerController? _localController;
+  PhoneNumberPickerController get _effectiveController =>
+      widget.controller ?? _localController!;
   late PhoneNumber _value;
-
-  void _onValueChanged(PhoneNumber value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   @override
   void initState() {
-    super.initState();
     _value = PhoneNumber(
       widget.initialPhoneNumber,
       countryCode: widget.useCountryCode ? widget.initialCountryCode : null,
     );
-    _controller = PhoneNumberPickerController(
-      initialPhoneNumber: _value,
-      onValueChanged: (value) {
-        _onValueChanged(value);
-        widget.onValueChanged?.call(value);
-      },
-    );
+    if (widget.controller == null) {
+      _localController = PhoneNumberPickerController.fromValue(
+        initialPhoneNumber: _value,
+      );
+    } else {
+      widget.controller!.setInitialValues(
+        initialPhoneNumber: _value,
+      );
+    }
+    _effectiveController.addListener(_handleValueChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
+    super.dispose();
+  }
+
+  void _handleValueChange() {
+    final PhoneNumber newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   @override
@@ -92,7 +108,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                         onChanged: widget.readOnly
                             ? null
                             : (value) {
-                                _controller.setValue(
+                                _effectiveController.setValue(
                                   PhoneNumber.fromList(
                                     _value.digits,
                                     countryCode: value as int,
@@ -106,11 +122,11 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                       _value.digits.length,
                       (index) => DropdownButton(
                         value: _value.digits[index],
-                        items: _items,
+                        items: _digitItems,
                         onChanged: widget.readOnly
                             ? null
                             : (value) {
-                                _controller.setDigit(index, value as int);
+                                _effectiveController.setDigit(index, value as int);
                               },
                       ),
                     ),
@@ -124,7 +140,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
               const Spacer(),
               GestureDetector(
                 onTap: () {
-                  _controller.removeDigit();
+                  _effectiveController.removeDigit();
                 },
                 child: Icon(
                   Icons.remove,
@@ -133,7 +149,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
               ),
               GestureDetector(
                 onTap: () {
-                  _controller.addDigit();
+                  _effectiveController.addDigit();
                 },
                 child: Icon(
                   Icons.add,
