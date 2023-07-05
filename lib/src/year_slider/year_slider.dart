@@ -35,37 +35,40 @@ class YearSlider extends StatefulWidget {
 }
 
 class _YearSliderState extends State<YearSlider> {
-  late YearSliderController _controller;
+  // late YearSliderController _controller;
+  YearSliderController? _localController;
+  YearSliderController get _effectiveController => _localController ?? widget.controller!;
   late Year _value;
-
-  void _onValueChanged(Year value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
     _value = Year(widget.initialYear);
     if (widget.controller == null) {
-      _controller = YearSliderController.fromValue(
+      _localController = YearSliderController.fromValue(
         initialYear: widget.initialYear,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     } else {
-      _controller = widget.controller!;
-      _controller.setInitialValues(
+      widget.controller!.setInitialValues(
         initialYear: widget.initialYear,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     }
+    _effectiveController.addListener(_handleValueChange);
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
+    super.dispose();
+  }
+
+  void _handleValueChange () {
+    final Year newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   @override
@@ -102,7 +105,7 @@ class _YearSliderState extends State<YearSlider> {
               min: widget.minYear.toDouble(),
               max: widget.maxYear.toDouble(),
               onChanged: (value) {
-                _controller.onSliderChange(value);
+                _effectiveController.onSliderChange(value);
               },
             ),
           ),

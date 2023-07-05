@@ -1,15 +1,13 @@
 part of '../../big_brain_forms.dart';
 
-class ValueSteppersController {
+class ValueSteppersController extends ChangeNotifier {
   int initialValue;
   int value;
   int steps;
-  void Function(int value)? onValueChanged;
 
   ValueSteppersController.fromValue({
     required this.initialValue,
     required this.steps,
-    this.onValueChanged,
   }) : value = initialValue;
 
   factory ValueSteppersController() {
@@ -22,11 +20,9 @@ class ValueSteppersController {
   void setInitialValues({
     required int initialValue,
     required int steps,
-    void Function(int value)? onValueChanged,
   }) {
     this.initialValue = initialValue;
     this.steps = steps;
-    this.onValueChanged = onValueChanged;
     value = initialValue;
   }
 
@@ -36,21 +32,21 @@ class ValueSteppersController {
 
   void setValue(int value) {
     this.value = value;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 
   void increment() {
     value += steps;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 
   void decrement() {
     value -= steps;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 
   void reset() {
     value = initialValue;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 }

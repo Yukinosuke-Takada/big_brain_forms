@@ -39,19 +39,12 @@ class PhoneNumber {
   }
 }
 
-class PhoneNumberPickerController {
+class PhoneNumberPickerController extends ChangeNotifier {
   PhoneNumber phoneNumber;
-  void Function(PhoneNumber phoneNumber)? onValueChanged;
   PhoneNumber initialPhoneNumber;
-
-  // PhoneNumberPickerController({
-  //   required this.initialPhoneNumber,
-  //   required this.onValueChanged,
-  // }) : phoneNumber = initialPhoneNumber;
 
   PhoneNumberPickerController.fromValue({
     required this.initialPhoneNumber,
-    this.onValueChanged,
   }) : phoneNumber = initialPhoneNumber;
 
   factory PhoneNumberPickerController() {
@@ -65,14 +58,13 @@ class PhoneNumberPickerController {
     void Function(PhoneNumber phoneNumber)? onValueChanged,
   }) {
     this.initialPhoneNumber = initialPhoneNumber;
-    this.onValueChanged = onValueChanged;
     phoneNumber = initialPhoneNumber;
   }
 
   /// Manually set the value of the [PhoneNumberPickerController].
   void setValue (PhoneNumber phoneNumber) {
     this.phoneNumber = phoneNumber;
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 
   PhoneNumber getValue() {
@@ -90,7 +82,7 @@ class PhoneNumberPickerController {
     }
 
     phoneNumber.digits[index] = value;
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 
   void setCountryCode(int value) {
@@ -99,22 +91,22 @@ class PhoneNumberPickerController {
       throw const FormatException('countryCode must be larger or equal to 0.');
     }
     phoneNumber.countryCode = value;
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 
   void addDigit() {
     phoneNumber.digits.add(0);
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 
   void removeDigit() {
     phoneNumber.digits.removeLast();
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 
   void reset() {
     phoneNumber = initialPhoneNumber;
-    onValueChanged?.call(phoneNumber);
+    notifyListeners();
   }
 }
 

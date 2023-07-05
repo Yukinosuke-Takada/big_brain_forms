@@ -59,19 +59,14 @@ class PhoneNumberPicker extends StatefulWidget {
 }
 
 class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
-  late PhoneNumberPickerController _controller;
+  PhoneNumberPickerController? _localController;
+  PhoneNumberPickerController get _effectiveController => widget.controller ?? _localController!;
   late PhoneNumber _value;
 
   late final ScrollController _scrollController;
 
   double _scrollPosition = 0.0;
   double _scrollMax = 0.0;
-
-  void _onValueChanged(PhoneNumber value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   @override
   void initState() {
@@ -81,23 +76,16 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
       countryCode: widget.useCountryCode ? widget.initialCountryCode : null,
     );
     if (widget.controller == null) {
-      _controller = PhoneNumberPickerController.fromValue(
+      _localController = PhoneNumberPickerController.fromValue(
         initialPhoneNumber: _value,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     } else {
-      _controller = widget.controller!;
-      _controller.setInitialValues(
+      widget.controller!.setInitialValues(
         initialPhoneNumber: _value,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     }
+
+    _effectiveController.addListener(_handleValueChange);
 
     _scrollController = ScrollController();
     _scrollController.addListener(() {
@@ -111,7 +99,17 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
     super.dispose();
+  }
+
+  void _handleValueChange () {
+    final PhoneNumber newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   void _setScrollPositions() {
@@ -219,7 +217,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                           onChanged: widget.readOnly
                               ? null
                               : (value) {
-                                  _controller.setValue(
+                                  _effectiveController.setValue(
                                     PhoneNumber.fromList(
                                       _value.digits,
                                       countryCode: value as int,
@@ -241,7 +239,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                               onChanged: widget.readOnly
                                   ? null
                                   : (value) {
-                                      _controller.setDigit(index, value as int);
+                                      _effectiveController.setDigit(index, value as int);
                                     },
                               style: widget.pickerTextStyle ?? TextStyle(fontSize: (widget.textFontSize ?? 14) + 2, color: Colors.black),
                               underline: Container(),
@@ -262,14 +260,14 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
               IconButton.filledTonal(
                 icon: widget.decrementIcon,
                 onPressed: canDecrement() ? () {
-                  if (canDecrement()) _controller.removeDigit();
+                  if (canDecrement()) _effectiveController.removeDigit();
                   _setScrollPositions();
                 } : null,
               ),
               IconButton.filledTonal(
                 icon: widget.incrementIcon,
                 onPressed: canIncrement() ? () {
-                  if (canIncrement()) _controller.addDigit();
+                  if (canIncrement()) _effectiveController.addDigit();
                   _setScrollPositions();
                 } : null,
               ),

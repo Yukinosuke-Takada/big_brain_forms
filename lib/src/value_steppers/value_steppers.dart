@@ -41,14 +41,9 @@ class ValueSteppers extends StatefulWidget {
 }
 
 class _ValueSteppersState extends State<ValueSteppers> {
-  late ValueSteppersController _controller;
+  ValueSteppersController? _localController;
+  ValueSteppersController get _effectiveController => widget.controller ?? _localController!;
   late int _value;
-
-  void _onValueChanged(int value) {
-    setState(() {
-      _value = value;
-    });
-  }
 
   bool canIncrement() {
     if (widget.readOnly) {
@@ -75,25 +70,32 @@ class _ValueSteppersState extends State<ValueSteppers> {
     super.initState();
     _value = widget.initialValue;
     if (widget.controller == null) {
-      _controller = ValueSteppersController.fromValue(
+      _localController = ValueSteppersController.fromValue(
         initialValue: widget.initialValue,
         steps: widget.steps,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     } else {
-      _controller = widget.controller!;
-      _controller.setInitialValues(
+      widget.controller!.setInitialValues(
         initialValue: widget.initialValue,
         steps: widget.steps,
-        onValueChanged: (value) {
-          _onValueChanged(value);
-          widget.onValueChanged?.call(value);
-        },
       );
     }
+    _effectiveController.addListener(_handleValueChange);
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleValueChange);
+    _localController?.dispose();
+    super.dispose();
+  }
+
+  void _handleValueChange () {
+    final int newValue = _effectiveController.getValue();
+    widget.onValueChanged?.call(newValue);
+    setState(() {
+      _value = newValue;
+    });
   }
 
   @override
@@ -116,13 +118,13 @@ class _ValueSteppersState extends State<ValueSteppers> {
               IconButton.filledTonal(
                 icon: widget.decrementIcon,
                 onPressed: canDecrement() ? () {
-                  if (canDecrement()) _controller.decrement();
+                  if (canDecrement()) _effectiveController.decrement();
                 } : null,
               ),
               IconButton.filledTonal(
                 icon: widget.incrementIcon,
                 onPressed: canIncrement() ? () {
-                  if (canIncrement()) _controller.increment();
+                  if (canIncrement()) _effectiveController.increment();
                 } : null,
               ),
             ],

@@ -80,14 +80,12 @@ class Year {
   }
 }
 
-class YearSliderController {
+class YearSliderController extends ChangeNotifier {
   Year value;
   Year initialYear;
-  void Function(Year)? onValueChanged;
 
   YearSliderController.fromValue({
     required int initialYear,
-    this.onValueChanged,
   })  : value = Year(initialYear),
         initialYear = Year(initialYear);
 
@@ -102,7 +100,6 @@ class YearSliderController {
     void Function(Year)? onValueChanged,
   }) {
     this.initialYear = Year(initialYear);
-    this.onValueChanged = onValueChanged;
     value = this.initialYear;
   }
 
@@ -112,17 +109,17 @@ class YearSliderController {
 
   void setValue(Year value) {
     this.value = value;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 
   void onSliderChange(double value) {
     final Year year = Year(value.toInt());
     this.value = year;
-    onValueChanged?.call(year);
+    notifyListeners();
   }
 
   void reset() {
     value = initialYear;
-    onValueChanged?.call(value);
+    notifyListeners();
   }
 }
