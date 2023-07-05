@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Big Brain Forms Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: Colors.blue,
+        useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Big Brain Forms Demo'),
     );
@@ -35,48 +36,54 @@ class MyHomePage extends StatelessWidget {
         title: Text(title),
       ),
       body: Center(
-        child: Column(
-          children: [
-            ValueSteppers(
-              controller: controller1,
-              text: 'Age',
-              minValue: -2,
-              maxValue: 100,
-              steps: 1,
-              onValueChanged: (value) {
-                print('Value changed to $value');
-              },
-            ),
-            PhoneNumberPicker(
-              controller: controller2,
-              text: 'Phone number',
-              initialPhoneNumber: '2065550100',
-              useCountryCode: true,
-              initialCountryCode: 1,
-              onValueChanged: (value) {
-                print('Value changed to $value');
-              },
-            ),
-            YearSlider(
-              controller: controller3,
-              text: 'Year',
-              initialYear: 2001,
-              minYear: -13600000000,
-              // minYear: 0,
-              maxYear: 2023,
-              onValueChanged: (value) {
-                print('Value changed to $value');
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                print('ValueSteppers: ${controller1.getValue()}');
-                print('PhoneNumberPicker: ${controller2.getValue()}');
-                print('YearSlider: ${controller3.getValue()}');
-              },
-              child: const Text('Print values'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              ValueSteppers(
+                controller: controller1,
+                text: 'Age',
+                minValue: -2,
+                maxValue: 100,
+                steps: 1,
+                onValueChanged: (value) {
+                  print('Value changed to $value');
+                },
+                textFontSize: 18,
+              ),
+              PhoneNumberPicker(
+                controller: controller2,
+                text: 'Phone number',
+                initialPhoneNumber: '2065550100',
+                useCountryCode: true,
+                initialCountryCode: 1,
+                onValueChanged: (value) {
+                  print('Value changed to $value');
+                },
+                textFontSize: 18,
+              ),
+              YearSlider(
+                controller: controller3,
+                text: 'Year',
+                initialYear: 2001,
+                minYear: -13600000000,
+                // minYear: 0,
+                maxYear: 2023,
+                onValueChanged: (value) {
+                  print('Value changed to $value');
+                },
+                textFontSize: 18,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print('ValueSteppers: ${controller1.getValue()}');
+                  print('PhoneNumberPicker: ${controller2.getValue()}');
+                  print('YearSlider: ${controller3.getValue()}');
+                },
+                child: const Text('Print values'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -9,6 +9,13 @@ class ValueSteppers extends StatefulWidget {
   final bool readOnly;
   final void Function(int value)? onValueChanged;
   final String text;
+  final double? textFontSize;
+  final TextStyle? labelTextStyle;
+  final TextStyle? valueTextStyle;
+  final Icon incrementIcon;
+  final Icon decrementIcon;
+  final double labelBottomPadding;
+  final double bottomPadding;
 
   const ValueSteppers({
     super.key,
@@ -20,6 +27,13 @@ class ValueSteppers extends StatefulWidget {
     this.readOnly = false,
     this.onValueChanged,
     required this.text,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.incrementIcon = const Icon(Icons.add),
+    this.decrementIcon = const Icon(Icons.remove),
+    this.labelBottomPadding = 8.0,
+    this.bottomPadding = 18.0,
   });
 
   @override
@@ -93,38 +107,36 @@ class _ValueSteppersState extends State<ValueSteppers> {
         children: [
           Row(
             children: [
-              Text(widget.text),
+              Text(
+                widget.text,
+                style: widget.labelTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+              ),
               const Spacer(),
-              Text(_value.toString()),
+              Text(
+                _value.toString(),
+                style: widget.valueTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+              ),
             ],
           ),
+          SizedBox(height: widget.labelBottomPadding),
           Row(
             children: [
               const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  if (canDecrement()) {
-                    _effectiveController.decrement();
-                  }
-                },
-                child: Icon(
-                  Icons.remove,
-                  color: canDecrement() ? null : Colors.grey,
-                ),
+              IconButton.filledTonal(
+                onPressed: canDecrement() ? () {
+                  if (canDecrement()) _effectiveController.decrement();
+                } : null,
+                icon: widget.decrementIcon,
               ),
-              GestureDetector(
-                onTap: () {
-                  if (canIncrement()) {
-                    _effectiveController.increment();
-                  }
-                },
-                child: Icon(
-                  Icons.add,
-                  color: canIncrement() ? null : Colors.grey,
-                ),
+              IconButton.filledTonal(
+                onPressed: canIncrement() ? () {
+                  if (canIncrement()) _effectiveController.increment();
+                } : null,
+                icon: widget.incrementIcon,
               ),
             ],
-          )
+          ),
+          SizedBox(height: widget.bottomPadding),
         ],
       ),
     );

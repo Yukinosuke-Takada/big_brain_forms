@@ -8,6 +8,11 @@ class YearSlider extends StatefulWidget {
   final bool readOnly;
   final void Function(Year value)? onValueChanged;
   final String text;
+  final double? textFontSize;
+  final TextStyle? labelTextStyle;
+  final TextStyle? valueTextStyle;
+  final double labelBottomPadding;
+  final double bottomPadding;
 
   const YearSlider({
     super.key,
@@ -18,6 +23,11 @@ class YearSlider extends StatefulWidget {
     this.readOnly = false,
     this.onValueChanged,
     required this.text,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.labelBottomPadding = 18.0,
+    this.bottomPadding = 18.0,
   });
 
   @override
@@ -69,19 +79,32 @@ class _YearSliderState extends State<YearSlider> {
         children: [
           Row(
             children: [
-              Text(widget.text),
+              Text(
+                widget.text,
+                style: widget.labelTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+              ),
               const Spacer(),
-              Text(_value.withFormat()),
+              Text(
+                _value.withFormat(),
+                style: widget.valueTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+              ),
             ],
           ),
-          Slider(
-            value: _value.year.toDouble(),
-            min: widget.minYear.toDouble(),
-            max: widget.maxYear.toDouble(),
-            onChanged: (value) {
-              _effectiveController.onSliderChange(value);
-            },
-          )
+          SizedBox(height: widget.labelBottomPadding),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              overlayShape: SliderComponentShape.noThumb,
+            ),
+            child: Slider(
+              value: _value.year.toDouble(),
+              min: widget.minYear.toDouble(),
+              max: widget.maxYear.toDouble(),
+              onChanged: (value) {
+                _effectiveController.onSliderChange(value);
+              },
+            ),
+          ),
+          SizedBox(height: widget.bottomPadding),
         ],
       ),
     );
