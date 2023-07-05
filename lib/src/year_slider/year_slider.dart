@@ -83,10 +83,16 @@ class _YearSliderState extends State<YearSlider> {
                 widget.text,
                 style: widget.labelTextStyle ?? TextStyle(fontSize: widget.textFontSize),
               ),
-              const Spacer(),
-              Text(
-                _value.withFormat(),
-                style: widget.valueTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+              const SizedBox(width: 32),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _value.withFormat(),
+                    style: widget.valueTextStyle ?? TextStyle(fontSize: widget.textFontSize),
+                  ),
+                ),
               ),
             ],
           ),
