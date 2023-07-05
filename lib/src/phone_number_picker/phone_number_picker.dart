@@ -64,6 +64,10 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
       widget.controller ?? _localController!;
   late PhoneNumber _value;
 
+  late final ScrollController _scrollController;
+  double _scrollPosition = 0.0;
+  double _scrollMax = 0.0;
+
   @override
   void initState() {
     _value = PhoneNumber(
@@ -80,11 +84,19 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
       );
     }
     _effectiveController.addListener(_handleValueChange);
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(_setScrollPositions);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setScrollPositions();
+    });
     super.initState();
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
+
     _effectiveController.removeListener(_handleValueChange);
     _localController?.dispose();
     super.dispose();
@@ -95,6 +107,21 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
     widget.onValueChanged?.call(newValue);
     setState(() {
       _value = newValue;
+    });
+  }
+
+  void _setScrollPositions() {
+    final double currentScrollPosition = _scrollController.position.pixels;
+    final double currentScrollMax = _scrollController.position.maxScrollExtent;
+    if (currentScrollPosition < 0 && _scrollPosition < 0) {
+      return;
+    }
+    if (currentScrollPosition > currentScrollMax && _scrollPosition > currentScrollMax) {
+      return;
+    }
+    setState(() {
+      _scrollPosition = currentScrollPosition;
+      _scrollMax = currentScrollMax;
     });
   }
 
@@ -113,6 +140,16 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
       return false;
     }
     return true;
+  }
+
+  int _to255(double value) {
+    if (value < 0) {
+      return 0;
+    }
+    if (value > 255) {
+      return 255;
+    }
+    return value.floor();
   }
 
   @override
@@ -141,51 +178,46 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
             ],
           ),
           SizedBox(height: widget.labelBottomPadding),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: (widget.textFontSize ?? 14) * 0.4 * widget.pickerSpacingIndex,
-                  ),
-                  if (widget.useCountryCode) ...[
-                    DropdownButton(
-                      value: _value.countryCode,
-                      items: _countryCodeItems,
-                      onChanged: widget.readOnly
-                          ? null
-                          : (value) {
-                              _effectiveController.setValue(
-                                PhoneNumber.fromList(
-                                  _value.digits,
-                                  countryCode: value as int,
-                                ),
-                              );
-                            },
-                      style: widget.pickerTextStyle ??
-                          TextStyle(
-                            fontSize: (widget.textFontSize ?? 14) + 2,
-                            color: Colors.black,
-                          ),
-                      underline: Container(),
-                    ),
-                    SizedBox(
-                      width: (widget.textFontSize ?? 14) * 1.2 * widget.pickerSpacingIndex,
-                    ),
-                  ],
-                  ...List.generate(
-                    _value.digits.length,
-                    (index) => Row(
-                      children: [
+          ShaderMask(
+            shaderCallback: (Rect rect) {
+              final Color startColor = _scrollPosition < 50
+                  ? Color.fromARGB(255 - _to255(_scrollPosition / 50 * 255), 0, 0, 0)
+                  : Colors.transparent;
+              final Color endColor = _scrollMax - _scrollPosition < 50
+                  ? Color.fromARGB(255 - _to255((_scrollMax - _scrollPosition) / 50 * 255), 0, 0, 0)
+                  : Colors.transparent;
+              return LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[startColor, Colors.black, Colors.black, endColor],
+                stops: const <double>[0.0, 0.2, 0.8, 1.0],
+              ).createShader(rect);
+            },
+            child: SizedBox(
+              width: double.infinity,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: (widget.textFontSize ?? 14) * 0.4 * widget.pickerSpacingIndex,
+                      ),
+                      if (widget.useCountryCode) ...[
                         DropdownButton(
-                          value: _value.digits[index],
-                          items: _digitItems,
+                          value: _value.countryCode,
+                          items: _countryCodeItems,
                           onChanged: widget.readOnly
                               ? null
                               : (value) {
-                                  _effectiveController.setDigit(index, value as int);
+                                  _effectiveController.setValue(
+                                    PhoneNumber.fromList(
+                                      _value.digits,
+                                      countryCode: value as int,
+                                    ),
+                                  );
                                 },
                           style: widget.pickerTextStyle ??
                               TextStyle(
@@ -195,12 +227,37 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                           underline: Container(),
                         ),
                         SizedBox(
-                          width: (widget.textFontSize ?? 14) * 0.4 * widget.pickerSpacingIndex,
+                          width: (widget.textFontSize ?? 14) * 1.2 * widget.pickerSpacingIndex,
                         ),
                       ],
-                    ),
+                      ...List.generate(
+                        _value.digits.length,
+                        (index) => Row(
+                          children: [
+                            DropdownButton(
+                              value: _value.digits[index],
+                              items: _digitItems,
+                              onChanged: widget.readOnly
+                                  ? null
+                                  : (value) {
+                                      _effectiveController.setDigit(index, value as int);
+                                    },
+                              style: widget.pickerTextStyle ??
+                                  TextStyle(
+                                    fontSize: (widget.textFontSize ?? 14) + 2,
+                                    color: Colors.black,
+                                  ),
+                              underline: Container(),
+                            ),
+                            SizedBox(
+                              width: (widget.textFontSize ?? 14) * 0.4 * widget.pickerSpacingIndex,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
                   ),
-                ]
+                )
               ),
             )
           ),
@@ -210,12 +267,14 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
               IconButton.filledTonal(
                 onPressed: canDecrement() ? () {
                   if (canDecrement()) _effectiveController.removeDigit();
+                  _setScrollPositions();
                 } : null,
                 icon: widget.decrementIcon,
               ),
               IconButton.filledTonal(
                 onPressed: canIncrement() ? () {
                   if (canIncrement()) _effectiveController.addDigit();
+                  _setScrollPositions();
                 } : null,
                 icon: widget.incrementIcon,
               ),
