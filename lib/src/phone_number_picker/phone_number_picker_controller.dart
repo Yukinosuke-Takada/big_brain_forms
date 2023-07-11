@@ -1,9 +1,11 @@
 part of '../../big_brain_forms.dart';
 
+/// Phone number Object. Stores the digits of a phone number and the country code. Specifically designed for the
+/// [PhoneNumberPickerController].
 class PhoneNumber {
-  // [2, 0, 6, 5, 5, 5, 0, 1, 0, 0]
+  /// The digits of the phone number. Stored as List of integers. ex: '2065550100' -> [2, 0, 6, 5, 5, 5, 0, 1, 0, 0]
   List<int> digits;
-  
+  /// The country code of the phone number. ex: '+1' -> 1
   int? countryCode;
 
   /// Creates a [PhoneNumber] from a [List] of digits. ex: [2, 0, 6, 5, 5, 5, 0, 1, 0, 0]
@@ -21,10 +23,12 @@ class PhoneNumber {
     return PhoneNumber.fromList(initialPhoneNumber.split('').map(int.parse).toList(), countryCode: countryCode);
   }
 
+  /// Returns the phoneNumber as a [String]. ex: '2065550100'
   String phoneNumberAsString() {
     return digits.join();
   }
-  
+
+  /// Returns the countryCode as a [String]. ex: '1'
   String countryCodeAsString() {
     return countryCode?.toString() ?? '';
   }
@@ -39,72 +43,84 @@ class PhoneNumber {
   }
 }
 
+/// Controller for a phone number picker. Stores the current value of the phone number and the country code.
 class PhoneNumberPickerController extends ChangeNotifier {
-  PhoneNumber initialPhoneNumber;
-  PhoneNumber phoneNumber;
+  /// Initial value of the phone number picker. Initial Value is used when resetting the phone number picker.
+  PhoneNumber initialValue;
+  /// The stored value of the phone number picker.
+  PhoneNumber value;
 
   PhoneNumberPickerController.fromValue({
-    required this.initialPhoneNumber,
-  }) : phoneNumber = initialPhoneNumber;
+    required this.initialValue,
+  }) : value = initialValue;
 
+  /// Creates a [PhoneNumberPickerController] with an empty phoneNumber.
   factory PhoneNumberPickerController() {
     return PhoneNumberPickerController.fromValue(
-      initialPhoneNumber: PhoneNumber(''),
+      initialValue: PhoneNumber(''),
     );
   }
 
+  /// Sets the initial value of the phoneNumber. Used for initializing the controller after its passed to the
+  /// widget. Does not notify listeners.
   void setInitialValues({
     required PhoneNumber initialPhoneNumber,
   }) {
-    this.initialPhoneNumber = initialPhoneNumber;
-    phoneNumber = initialPhoneNumber;
+    initialValue = initialPhoneNumber;
+    value = initialPhoneNumber;
   }
 
-  /// Manually set the value of the [PhoneNumberPickerController].
+  /// Sets the value of the phoneNumber.
   void setValue (PhoneNumber phoneNumber) {
-    this.phoneNumber = phoneNumber;
+    value = phoneNumber;
     notifyListeners();
   }
 
+  /// Returns the current value of the phoneNumber.
   PhoneNumber getValue() {
-    return phoneNumber;
+    return value;
   }
 
-  void setDigit(int index, int value) {
+  /// Sets the digit at the given index to the given value.
+  void setDigit(int index, int v) {
     // check if value is a digit
-    if (value < 0 || 9 < value) {
+    if (v < 0 || 9 < v) {
       throw const FormatException('value must be a digit.');
     }
     // check if index is valid
-    if (index < 0 || phoneNumber.digits.length <= index) {
+    if (index < 0 || value.digits.length <= index) {
       throw const FormatException('index must be within the range of the phoneNumber length.');
     }
 
-    phoneNumber.digits[index] = value;
+    value.digits[index] = v;
     notifyListeners();
   }
 
-  void setCountryCode(int value) {
+  /// Sets the country code.
+  void setCountryCode(int v) {
     // check if value is valid
-    if (value < 0) {
+    if (v < 0) {
       throw const FormatException('countryCode must be larger or equal to 0.');
     }
-    phoneNumber.countryCode = value;
+    value.countryCode = v;
     notifyListeners();
   }
 
+  /// Adds a digit to the phoneNumber. Adds a 0 to the end of the phoneNumber.
   void addDigit() {
-    phoneNumber.digits.add(0);
+    value.digits.add(0);
     notifyListeners();
   }
 
+  /// Removes a digit from the phoneNumber. Removes the last digit of the phoneNumber.
   void removeDigit() {
-    phoneNumber.digits.removeLast();
+    value.digits.removeLast();
     notifyListeners();
   }
 
+  /// Resets the value to the initial value.
   void reset() {
-    phoneNumber = initialPhoneNumber;
+    value = initialValue;
     notifyListeners();
   }
 }

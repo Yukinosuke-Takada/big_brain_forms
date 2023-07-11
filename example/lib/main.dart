@@ -42,7 +42,7 @@ class MyHomePage extends StatelessWidget {
             children: [
               ValueSteppers(
                 controller: controller1,
-                text: 'Age',
+                labelText: 'Age',
                 minValue: -2,
                 maxValue: 100,
                 steps: 1,
@@ -53,7 +53,7 @@ class MyHomePage extends StatelessWidget {
               ),
               PhoneNumberPicker(
                 controller: controller2,
-                text: 'Phone number',
+                labelText: 'Phone number',
                 initialPhoneNumber: '2065550100',
                 useCountryCode: true,
                 initialCountryCode: 1,
@@ -64,10 +64,9 @@ class MyHomePage extends StatelessWidget {
               ),
               YearSlider(
                 controller: controller3,
-                text: 'Year',
+                labelText: 'Year',
                 initialYear: 2001,
                 minYear: -13600000000,
-                // minYear: 0,
                 maxYear: 2023,
                 onValueChanged: (value) {
                   print('Value changed to $value');

@@ -1,20 +1,37 @@
 part of '../../big_brain_forms.dart';
 
+/// A complimentary widget. A value field where you have to change the value with a stepper.
 class ValueSteppers extends StatefulWidget {
+  /// The controller for the value stepper. The passed controller with be initialized with the given parameters:
+  /// [initialValue], [steps]. If null, a local controller will be created.
   final ValueSteppersController? controller;
+  /// The initial value of the stepper.
   final int initialValue;
+  /// The minimum value that the stepper can be set to.
   final int? minValue;
+  /// The maximum value that the stepper can be set to.
   final int? maxValue;
+  /// The number of steps to increment or decrement the value.
   final int steps;
+  /// Whether the stepper is read only. If true, the stepper cannot be changed and greyed out.
   final bool readOnly;
+  /// Callback function for when the value of the stepper changes.
   final void Function(int value)? onValueChanged;
-  final String text;
+  /// The text to display above the stepper.
+  final String labelText;
+  /// The font size of the label and value.
   final double? textFontSize;
+  /// The text style of the label.
   final TextStyle? labelTextStyle;
+  /// The text style of the value.
   final TextStyle? valueTextStyle;
+  /// The icon for the increment stepper button.
   final Icon incrementIcon;
+  /// The icon for the decrement stepper button.
   final Icon decrementIcon;
+  /// The padding between the label and the stepper.
   final double labelBottomPadding;
+  /// The padding at the bottom of this widget.
   final double bottomPadding;
 
   const ValueSteppers({
@@ -26,7 +43,7 @@ class ValueSteppers extends StatefulWidget {
     this.steps = 1,
     this.readOnly = false,
     this.onValueChanged,
-    required this.text,
+    required this.labelText,
     this.textFontSize,
     this.labelTextStyle,
     this.valueTextStyle,
@@ -41,12 +58,16 @@ class ValueSteppers extends StatefulWidget {
 }
 
 class _ValueSteppersState extends State<ValueSteppers> {
+  /// The local controller for the stepper. Only used if [widget.controller] is null.
   ValueSteppersController? _localController;
-  ValueSteppersController get _effectiveController =>
-      widget.controller ?? _localController!;
+  // Returns the effective controller.
+  ValueSteppersController get _effectiveController => widget.controller ?? _localController!;
+
+  /// The current value of the stepper.
   late int _value;
 
-  bool canIncrement() {
+  // Checks if the stepper can be incremented.
+  bool _canIncrement() {
     if (widget.readOnly) {
       return false;
     }
@@ -56,7 +77,8 @@ class _ValueSteppersState extends State<ValueSteppers> {
     return true;
   }
 
-  bool canDecrement() {
+  // Checks if the stepper can be decremented.
+  bool _canDecrement() {
     if (widget.readOnly) {
       return false;
     }
@@ -68,7 +90,9 @@ class _ValueSteppersState extends State<ValueSteppers> {
 
   @override
   void initState() {
+    // Initialize the value of the stepper.
     _value = widget.initialValue;
+    // Initialize the controller.
     if (widget.controller == null) {
       _localController = ValueSteppersController.fromValue(
         initialValue: widget.initialValue,
@@ -87,10 +111,12 @@ class _ValueSteppersState extends State<ValueSteppers> {
   @override
   void dispose() {
     _effectiveController.removeListener(_handleValueChange);
+    // Dispose the local controller if it was created.
     _localController?.dispose();
     super.dispose();
   }
 
+  /// When the controller value changes, update the value of the stepper and call the callback function.
   void _handleValueChange() {
     final int newValue = _effectiveController.getValue();
     widget.onValueChanged?.call(newValue);
@@ -108,7 +134,7 @@ class _ValueSteppersState extends State<ValueSteppers> {
           Row(
             children: [
               Text(
-                widget.text,
+                widget.labelText,
                 style: widget.labelTextStyle ?? TextStyle(fontSize: widget.textFontSize),
               ),
               const Spacer(),
@@ -123,14 +149,14 @@ class _ValueSteppersState extends State<ValueSteppers> {
             children: [
               const Spacer(),
               IconButton.filledTonal(
-                onPressed: canDecrement() ? () {
-                  if (canDecrement()) _effectiveController.decrement();
+                onPressed: _canDecrement() ? () {
+                  if (_canDecrement()) _effectiveController.decrement();
                 } : null,
                 icon: widget.decrementIcon,
               ),
               IconButton.filledTonal(
-                onPressed: canIncrement() ? () {
-                  if (canIncrement()) _effectiveController.increment();
+                onPressed: _canIncrement() ? () {
+                  if (_canIncrement()) _effectiveController.increment();
                 } : null,
                 icon: widget.incrementIcon,
               ),
