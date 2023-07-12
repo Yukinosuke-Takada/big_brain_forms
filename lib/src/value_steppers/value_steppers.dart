@@ -2,6 +2,26 @@ part of '../../big_brain_forms.dart';
 
 /// A complimentary widget. A value field where you have to change the value with a stepper.
 class ValueSteppers extends StatefulWidget {
+  /// Creates a value field where you have to change the value with a stepper.
+  const ValueSteppers({
+    required this.labelText,
+    super.key,
+    this.controller,
+    this.initialValue = 0,
+    this.minValue,
+    this.maxValue,
+    this.steps = 1,
+    this.readOnly = false,
+    this.onValueChanged,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.incrementIcon = const Icon(Icons.add),
+    this.decrementIcon = const Icon(Icons.remove),
+    this.labelBottomPadding = 8.0,
+    this.bottomPadding = 18.0,
+  });
+
   /// The controller for the value stepper. The passed controller with be initialized with the given parameters:
   /// [initialValue], [steps]. If null, a local controller will be created.
   final ValueSteppersController? controller;
@@ -34,31 +54,13 @@ class ValueSteppers extends StatefulWidget {
   /// The padding at the bottom of this widget.
   final double bottomPadding;
 
-  const ValueSteppers({
-    super.key,
-    this.controller,
-    this.initialValue = 0,
-    this.minValue,
-    this.maxValue,
-    this.steps = 1,
-    this.readOnly = false,
-    this.onValueChanged,
-    required this.labelText,
-    this.textFontSize,
-    this.labelTextStyle,
-    this.valueTextStyle,
-    this.incrementIcon = const Icon(Icons.add),
-    this.decrementIcon = const Icon(Icons.remove),
-    this.labelBottomPadding = 8.0,
-    this.bottomPadding = 18.0,
-  });
 
   @override
   State<ValueSteppers> createState() => _ValueSteppersState();
 }
 
 class _ValueSteppersState extends State<ValueSteppers> {
-  /// The local controller for the stepper. Only used if [widget.controller] is null.
+  /// The local controller for the stepper. Only used if widget.controller is null.
   ValueSteppersController? _localController;
   // Returns the effective controller.
   ValueSteppersController get _effectiveController => widget.controller ?? _localController!;
@@ -118,7 +120,7 @@ class _ValueSteppersState extends State<ValueSteppers> {
 
   /// When the controller value changes, update the value of the stepper and call the callback function.
   void _handleValueChange() {
-    final int newValue = _effectiveController.getValue();
+    final newValue = _effectiveController.getValue();
     widget.onValueChanged?.call(newValue);
     setState(() {
       _value = newValue;
@@ -128,7 +130,7 @@ class _ValueSteppersState extends State<ValueSteppers> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           Row(

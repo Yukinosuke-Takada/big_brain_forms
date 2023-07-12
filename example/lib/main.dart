@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:big_brain_forms/big_brain_forms.dart';
 import 'package:flutter/material.dart';
 

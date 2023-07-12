@@ -1,26 +1,26 @@
 part of '../../big_brain_forms.dart';
 
 /// Abbreviations for the year. Used in [Year.withFormat].
-/// 
-/// [integer] - ex: 2023, -2023
-/// [bc] - ex: 2023, -2023 BC
-/// [bcAd] - ex: AD 2023, -2023 BC
-/// [bce] - ex: 2023, -2023 BCE
-/// [bceCe] - ex: 2023 CE, -2023 BCE
 enum YearAbbreviation {
+  /// [integer] - ex: 2023, -2023
   integer,
+  /// [bc] - ex: 2023, -2023 BC
   bc,
+  /// [bcAd] - ex: AD 2023, -2023 BC
   bcAd,
+  /// [bce] - ex: 2023, -2023 BCE
   bce,
+  /// [bceCe] - ex: 2023 CE, -2023 BCE
   bceCe,
 }
 
 /// Year Object. Stores the year as an int. Specifically designed for the [YearSliderController].
 class Year {
+  /// Creates a [Year] from an integer.
+  Year(this.year);
+
   /// The year as an int.
   int year;
-
-  Year(this.year);
 
   /// Returns the year as a [String] with the specified [YearAbbreviation].
   /// 
@@ -41,33 +41,33 @@ class Year {
       return year.toString();
     }
 
-    final bool isPositive = year >= 0;
-    final int absYear = year.abs();
+    final isPositive = year >= 0;
+    final absYear = year.abs();
     
     // Check if the year should use either suffix.
-    final bool useBillionSuffixForThisYear = useMillionBillionSuffix && absYear >= useBillionSuffixAfter;
-    final bool useMillionSuffixForThisYear = useMillionBillionSuffix && absYear >= useMillionSuffixAfter;
+    final useBillionSuffixForThisYear = useMillionBillionSuffix && absYear >= useBillionSuffixAfter;
+    final useMillionSuffixForThisYear = useMillionBillionSuffix && absYear >= useMillionSuffixAfter;
     late final String absYearFormatted;
     if (useBillionSuffixForThisYear) {
-      final double absYearInBillions = absYear / 1000000000;
+      final absYearInBillions = absYear / 1000000000;
 
       if (precisionForSuffix == null) {
         absYearFormatted = '$absYearInBillions billion';
       } else {
-        final String absYearWithPrecision = absYearInBillions.toStringAsFixed(precisionForSuffix);
+        final absYearWithPrecision = absYearInBillions.toStringAsFixed(precisionForSuffix);
         // Hacky way to remove trailing zeros.
-        final String absYearWithPrecisionNoTrailing = double.parse(absYearWithPrecision).toString();
+        final absYearWithPrecisionNoTrailing = double.parse(absYearWithPrecision).toString();
         absYearFormatted = '$absYearWithPrecisionNoTrailing billion';
       }
     } else if (useMillionSuffixForThisYear) {
-      final double absYearInMillions = absYear / 1000000;
+      final absYearInMillions = absYear / 1000000;
 
       if (precisionForSuffix == null) {
         absYearFormatted = '$absYearInMillions million';
       } else {
-        final String absYearWithPrecision = absYearInMillions.toStringAsFixed(precisionForSuffix);
+        final absYearWithPrecision = absYearInMillions.toStringAsFixed(precisionForSuffix);
         // Hacky way to remove trailing zeros.
-        final String absYearWithPrecisionNoTrailing = double.parse(absYearWithPrecision).toString();
+        final absYearWithPrecisionNoTrailing = double.parse(absYearWithPrecision).toString();
         absYearFormatted = '$absYearWithPrecisionNoTrailing million';
       }
     } else {
@@ -85,7 +85,7 @@ class Year {
       case YearAbbreviation.bceCe:
         // Ce is written after the year!
         return isPositive ? '$absYearFormatted CE' : '$absYearFormatted BCE';
-      default:
+      case YearAbbreviation.integer:
         throw Exception('should not reach here');
     }
   }
@@ -98,21 +98,22 @@ class Year {
 
 /// Controller for a year slider. Stores the current value of the year.
 class YearSliderController extends ChangeNotifier {
-  /// Initial value of the year slider. Initial Value is used when resetting the year slider.
-  Year initialValue;
-  /// The stored value of the year slider.
-  Year value;
-
-  YearSliderController.fromValue({
-    required int initialYear,
-  })  : value = Year(initialYear),
-        initialValue = Year(initialYear);
-
+  /// Creates a [YearSliderController] with an initial value of 0.
   factory YearSliderController() {
     return YearSliderController.fromValue(
       initialYear: 0,
     );
   }
+
+  /// Creates a [YearSliderController] with the given parameters.
+  YearSliderController.fromValue({
+    required int initialYear,
+  })  : value = Year(initialYear), initialValue = Year(initialYear);
+
+  /// Initial value of the year slider. Initial Value is used when resetting the year slider.
+  Year initialValue;
+  /// The stored value of the year slider.
+  Year value;
 
   /// Sets the initial value of the year slider. Used for initializing the controller after its passed to the widget.
   void setInitialValues({
@@ -135,7 +136,7 @@ class YearSliderController extends ChangeNotifier {
 
   /// Sets the value to the value passed down from the slider.
   void onSliderChange(double value) {
-    final Year year = Year(value.toInt());
+    final year = Year(value.toInt());
     this.value = year;
     notifyListeners();
   }

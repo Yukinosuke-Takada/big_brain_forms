@@ -2,6 +2,23 @@ part of '../../big_brain_forms.dart';
 
 /// A complimentary widget. A year field where you have to select the year from a slider.
 class YearSlider extends StatefulWidget {
+  /// Creates a year field where you have to select the year from a slider.
+  const YearSlider({
+    required this.minYear,
+    required this.maxYear,
+    required this.labelText,
+    super.key,
+    this.controller,
+    this.initialYear = 0,
+    this.readOnly = false,
+    this.onValueChanged,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.labelBottomPadding = 18.0,
+    this.bottomPadding = 18.0,
+  });
+
   /// The controller for the year slider. The passed controller with be initialized with the given parameters:
   /// [initialYear]. If null, a local controller will be created.
   final YearSliderController? controller;
@@ -28,28 +45,13 @@ class YearSlider extends StatefulWidget {
   /// The padding at the bottom of this widget.
   final double bottomPadding;
 
-  const YearSlider({
-    super.key,
-    this.controller,
-    this.initialYear = 0,
-    required this.minYear,
-    required this.maxYear,
-    this.readOnly = false,
-    this.onValueChanged,
-    required this.labelText,
-    this.textFontSize,
-    this.labelTextStyle,
-    this.valueTextStyle,
-    this.labelBottomPadding = 18.0,
-    this.bottomPadding = 18.0,
-  });
 
   @override
   State<YearSlider> createState() => _YearSliderState();
 }
 
 class _YearSliderState extends State<YearSlider> {
-  /// The local controller for the year slider. Only used if [widget.controller] is null.
+  /// The local controller for the year slider. Only used if widget.controller is null.
   YearSliderController? _localController;
   // Returns the effective controller.
   YearSliderController get _effectiveController => widget.controller ?? _localController!;
@@ -85,7 +87,7 @@ class _YearSliderState extends State<YearSlider> {
 
   /// When the controller value changes, update the value of the year slider and call the callback function.
   void _handleValueChange() {
-    final Year newValue = _effectiveController.getValue();
+    final newValue = _effectiveController.getValue();
     widget.onValueChanged?.call(newValue);
     setState(() {
       _value = newValue;
@@ -95,7 +97,7 @@ class _YearSliderState extends State<YearSlider> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           Row(

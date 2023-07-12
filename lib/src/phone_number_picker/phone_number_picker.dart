@@ -14,12 +14,36 @@ final List<DropdownMenuItem<int>> _countryCodeItems = List.generate(
   1000,
   (index) => DropdownMenuItem(
     value: index,
-    child: Text('+${index.toString()}'),
+    child: Text('+$index'),
   ),
 );
 
 /// A complimentary widget. A phone number field where you have to select each digit from a dropdown menu.
 class PhoneNumberPicker extends StatefulWidget {
+  /// Creates a phone number field where you have to select each digit from a dropdown menu.
+  const PhoneNumberPicker({
+    required this.labelText,
+    super.key,
+    this.controller,
+    this.initialPhoneNumber = '0000000000',
+    this.useCountryCode = false,
+    this.initialCountryCode,
+    this.readOnly = false,
+    this.onValueChanged,
+    this.textFontSize,
+    this.labelTextStyle,
+    this.valueTextStyle,
+    this.pickerTextStyle,
+    this.pickerSpacingIndex = 1.0,
+    this.incrementIcon = const Icon(Icons.add),
+    this.decrementIcon = const Icon(Icons.remove),
+    this.labelBottomPadding = 8.0,
+    this.bottomPadding = 18.0,
+  }) : assert(
+          !useCountryCode || initialCountryCode != null,
+          'useCountryCode must be true if initialCountryCode is null',
+        );
+
   /// The controller for the phone number picker. The passed controller with be initialized with the given parameters:
   /// [initialPhoneNumber], [initialCountryCode]. If null, a local controller will be created.
   final PhoneNumberPickerController? controller;
@@ -61,32 +85,12 @@ class PhoneNumberPicker extends StatefulWidget {
   /// The padding at the bottom of this widget.
   final double bottomPadding;
 
-  const PhoneNumberPicker({
-    super.key,
-    this.controller,
-    this.initialPhoneNumber = '0000000000',
-    this.useCountryCode = false,
-    this.initialCountryCode,
-    this.readOnly = false,
-    this.onValueChanged,
-    required this.labelText,
-    this.textFontSize,
-    this.labelTextStyle,
-    this.valueTextStyle,
-    this.pickerTextStyle,
-    this.pickerSpacingIndex = 1.0,
-    this.incrementIcon = const Icon(Icons.add),
-    this.decrementIcon = const Icon(Icons.remove),
-    this.labelBottomPadding = 8.0,
-    this.bottomPadding = 18.0,
-  }) : assert(!useCountryCode || initialCountryCode != null);
-
   @override
   State<PhoneNumberPicker> createState() => _PhoneNumberPickerState();
 }
 
 class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
-  /// The local controller for the phone number picker. Only used if [widget.controller] is null.
+  /// The local controller for the phone number picker. Only used if widget.controller is null.
   PhoneNumberPickerController? _localController;
   // Returns the effective controller.
   PhoneNumberPickerController get _effectiveController => widget.controller ?? _localController!;
@@ -97,8 +101,8 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
   /// The scroll controller for the singleScrollView that contains the dropdown menus.
   late final ScrollController _scrollController;
   /// The current scroll position and max scroll position of the singleScrollView.
-  double _scrollPosition = 0.0;
-  double _scrollMax = 0.0;
+  double _scrollPosition = 0;
+  double _scrollMax = 0;
 
   @override
   void initState() {
@@ -140,7 +144,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
 
   /// Callback function for when the value of the phone number picker changes.
   void _handleValueChange() {
-    final PhoneNumber newValue = _effectiveController.getValue();
+    final newValue = _effectiveController.getValue();
     widget.onValueChanged?.call(newValue);
     setState(() {
       _value = newValue;
@@ -149,8 +153,8 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
 
   /// Sets the scroll position and max scroll position of the singleScrollView and rerenders if necessary.
   void _setScrollPositions() {
-    final double currentScrollPosition = _scrollController.position.pixels;
-    final double currentScrollMax = _scrollController.position.maxScrollExtent;
+    final currentScrollPosition = _scrollController.position.pixels;
+    final currentScrollMax = _scrollController.position.maxScrollExtent;
     if (currentScrollPosition < 0 && _scrollPosition < 0) {
       return;
     }
@@ -196,7 +200,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           Row(
@@ -222,17 +226,15 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
           /// The end of the singleScrollView will have fade out effect if it can be scrolled in that direction.
           ShaderMask(
             shaderCallback: (Rect rect) {
-              final Color startColor = _scrollPosition < 50
+              final startColor = _scrollPosition < 50
                   ? Color.fromARGB(255 - _to255(_scrollPosition / 50 * 255), 0, 0, 0)
                   : Colors.transparent;
-              final Color endColor = _scrollMax - _scrollPosition < 50
+              final endColor = _scrollMax - _scrollPosition < 50
                   ? Color.fromARGB(255 - _to255((_scrollMax - _scrollPosition) / 50 * 255), 0, 0, 0)
                   : Colors.transparent;
               return LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
                 colors: <Color>[startColor, Colors.black, Colors.black, endColor],
-                stops: const <double>[0.0, 0.2, 0.8, 1.0],
+                stops: const <double>[0, 0.2, 0.8, 1],
               ).createShader(rect);
             },
             child: SizedBox(
@@ -257,7 +259,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                                   _effectiveController.setValue(
                                     PhoneNumber.fromList(
                                       _value.digits,
-                                      countryCode: value as int,
+                                      countryCode: value! as int,
                                     ),
                                   );
                                 },
@@ -282,7 +284,7 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                               onChanged: widget.readOnly
                                   ? null
                                   : (value) {
-                                      _effectiveController.setDigit(index, value as int);
+                                      _effectiveController.setDigit(index, value! as int);
                                     },
                               style: widget.pickerTextStyle ??
                                   TextStyle(
@@ -297,11 +299,11 @@ class _PhoneNumberPickerState extends State<PhoneNumberPicker> {
                           ],
                         ),
                       ),
-                    ]
+                    ],
                   ),
-                )
+                ),
               ),
-            )
+            ),
           ),
           Row(
             children: [

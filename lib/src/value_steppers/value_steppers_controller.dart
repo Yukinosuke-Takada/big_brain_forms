@@ -3,24 +3,26 @@ part of '../../big_brain_forms.dart';
 /// Controller for a value stepper. Stores the current value of the stepper and the number of steps to increment or
 /// decrement the value. Can be used to reset the stepper to its initial value.
 class ValueSteppersController extends ChangeNotifier {
-  /// Initial value of the stepper. Initial Value is used when resetting the stepper.
-  int initialValue;
-  /// The stored value of the stepper.
-  int value;
-  /// The number of steps to increment or decrement the value.
-  int steps;
-
-  ValueSteppersController.fromValue({
-    required this.initialValue,
-    required this.steps,
-  }) : value = initialValue;
-
+  /// Creates a [ValueSteppersController] with an initial value of 0 and steps of 1.
   factory ValueSteppersController() {
     return ValueSteppersController.fromValue(
       initialValue: 0,
       steps: 1,
     );
   }
+
+  /// Creates a [ValueSteppersController] with the given parameters.
+  ValueSteppersController.fromValue({
+    required this.initialValue,
+    required this.steps,
+  }) : value = initialValue;
+
+  /// Initial value of the stepper. Initial Value is used when resetting the stepper.
+  int initialValue;
+  /// The stored value of the stepper.
+  int value;
+  /// The number of steps to increment or decrement the value.
+  int steps;
 
   /// Sets the initial value and steps of the stepper. Used for initializing the controller after its passed to the 
   /// widget. Does not notify listeners.
